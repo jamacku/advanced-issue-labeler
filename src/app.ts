@@ -58,7 +58,7 @@ const app = (probot: Probot) => {
   });
 };
 
-function isCompliant(policy: string[], keyword: string) {
+export function isCompliant(policy: string[], keyword: string) {
   return !!policy.find(rule => keyword === rule);
 }
 
