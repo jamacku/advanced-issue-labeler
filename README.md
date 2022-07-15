@@ -117,6 +117,21 @@ Token used to set labels
 * requirements: `required`
 * recomended value: `secrets.GITHUB_TOKEN`
 
+## Policy
+
+```yml
+boot: ['boot']
+homed: ['homed']
+journal: ['journal']
+login: ['login']
+network: ['network']
+nspawn: ['nspawn']
+resolve: ['systemd-resolved', 'resolvectl', 'nss-resolve']
+systemctl: ['systemctl']
+systemd: ['systemd']
+udev: ['udev']
+```
+
 ## Limitations
 
 * TBA

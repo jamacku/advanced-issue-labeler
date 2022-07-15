@@ -14,18 +14,35 @@ const app = (probot: Probot) => {
       return;
     }
 
-    const labels: string[] = issueForm[section]
+    const keywords: string[] = issueForm[section]
       .split(', ', 10)
       .filter(label => !blockList.find(toRemove => label === toRemove));
 
-    if (labels.length === 0) {
+    if (keywords.length === 0) {
       debug(`Section field is empty.`);
       return;
     }
 
-    if (!labels[0]) {
+    if (!keywords[0]) {
       debug(`Section field is empty.`);
       return;
+    }
+
+    /* Get labels based on policy if set */
+    let labels: string[] = [];
+    const config: { policy: { [key: string]: string[] } } | null =
+      await context.config('advanced-issue-labeler.yml');
+
+    if (!config) {
+      labels = keywords;
+    } else {
+      for (const rule in config?.policy) {
+        for (const keyword of keywords) {
+          if (!config.policy[rule].find(item => keyword === item)) {
+            labels.push(rule);
+          }
+        }
+      }
     }
 
     debug(`Labels to be set: ${labels}`);
