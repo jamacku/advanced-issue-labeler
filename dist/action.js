@@ -5,6 +5,7 @@ import { IssueForm } from './issue-form';
 import { Labeler } from './labeler';
 import { issueFormSchema } from './schema/input';
 async function action(octokit) {
+    var _a;
     const parsedIssueForm = issueFormSchema.safeParse(JSON.parse(getInput('issue-form', { required: true })));
     if (!parsedIssueForm.success) {
         throw new Error(`Incorrect format of provided 'issue-form' input: ${parsedIssueForm.error.message}`);
@@ -22,8 +23,13 @@ async function action(octokit) {
     }
     info(`Labels to be set: ${labels}`);
     info(`Used policy: ${JSON.stringify(labeler.outputPolicy, null, 2)}`);
-    const response = await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/labels', Object.assign(Object.assign({}, context.repo), { issue_number: context.issue.number, labels }));
-    debug(`GitHub API response status: [${response.status}]`);
+    const response = await octokit.graphql(`mutation AddLabels($issueId: ID!, $labelIds: [ID!]!) {
+      addLabelsToLabelable(input: {labelableId: $issueId, labelIds: $labelIds}) {
+        clientMutationId
+      }
+    }`, Object.assign({ issueId: (_a = context.payload.issue) === null || _a === void 0 ? void 0 : _a.node_id, labelIds: labels }, context.repo));
+    debug(`GitHub API response status: [OK]`);
+    debug(`GitHub API response data: ${JSON.stringify(response, null, 2)}`);
 }
 export default action;
 //# sourceMappingURL=action.js.map

@@ -36,16 +36,21 @@ async function action(octokit: CustomOctokit) {
   info(`Labels to be set: ${labels}`);
   info(`Used policy: ${JSON.stringify(labeler.outputPolicy, null, 2)}`);
 
-  const response = await octokit.request(
-    'POST /repos/{owner}/{repo}/issues/{issue_number}/labels',
+  const response = await octokit.graphql(
+    `mutation AddLabels($issueId: ID!, $labelIds: [ID!]!) {
+      addLabelsToLabelable(input: {labelableId: $issueId, labelIds: $labelIds}) {
+        clientMutationId
+      }
+    }`,
     {
+      issueId: context.payload.issue?.node_id,
+      labelIds: labels,
       ...context.repo,
-      issue_number: context.issue.number,
-      labels,
     }
   );
 
-  debug(`GitHub API response status: [${response.status}]`);
+  debug(`GitHub API response status: [OK]`);
+  debug(`GitHub API response data: ${JSON.stringify(response, null, 2)}`);
 }
 
 export default action;
